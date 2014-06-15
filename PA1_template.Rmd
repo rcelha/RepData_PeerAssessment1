@@ -3,11 +3,60 @@
 
 ## Loading and preprocessing the data
 
+_The data is already in the repos (activity.zip)_
+
+1. Unzip the file
+2. Read the csv
+3. Transform the date column
+
+```{r echo=TRUE, cache=TRUE}
+
+unzip("activity.zip", c("activity.csv"))
+activity <- read.csv("activity.csv")
+activity$date <- as.Date(activity$date)
+
+# let's see what's inside:
+summary(activity)
+
+```
 
 
 ## What is mean total number of steps taken per day?
 
+Here's some exploration of the data. A Histogram of a total number of steps of each day. At the end, the mean and median of total number of steps per day
 
+```{r echo=TRUE, cache=TRUE}
+library(ggplot2)
+
+# calculate the number steps by day
+steps_a_day <- aggregate(activity$steps,
+                         by=list(activity$date),
+                         FUN=sum)
+
+# change the names
+names(steps_a_day) <- c("date", "steps")
+
+# histogram of steps/day
+chart <- ggplot(steps_a_day) +
+    aes(date, steps) +
+    geom_histogram(stat="identity")
+
+print(chart)
+
+
+# getting  mean and median values
+steps_mean <- mean(steps_a_day$steps, na.rm=T)
+steps_median <- median(steps_a_day$steps, na.rm=T)
+
+# Mean total number of steps per day
+print(steps_mean)
+
+# Median total number of steps per day
+print(steps_median)
+
+
+
+```
 
 ## What is the average daily activity pattern?
 

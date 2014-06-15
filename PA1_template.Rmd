@@ -5,15 +5,27 @@
 
 _The data is already in the repos (activity.zip)_
 
-1. Unzip the file
-2. Read the csv
-3. Transform the date column
+* Unzip the file
+* Read the csv
+* Transform the date column
+* Transform the interval into printable time
 
 ```{r echo=TRUE, cache=TRUE}
 
 unzip("activity.zip", c("activity.csv"))
 activity <- read.csv("activity.csv")
 activity$date <- as.Date(activity$date)
+
+# Transform the interval format into a printable time (ie. 155 into "01:55")
+interval2time <- function(interval) {
+    h = as.integer(interval / 100)
+    h = sprintf("%02d", h)
+    m = (interval %% 100)
+    m = sprintf("%02d", m)
+    paste(h, m, sep=":")
+}
+
+activity$time <- interval2time(activity$interval)
 
 # let's see what's inside:
 summary(activity)
@@ -54,11 +66,37 @@ print(steps_mean)
 # Median total number of steps per day
 print(steps_median)
 
-
-
 ```
 
 ## What is the average daily activity pattern?
+```{r echo=TRUE, cache=TRUE}
+
+# calculate the number steps by day
+steps_interval <- aggregate(list(steps=activity$steps),
+                            by=list(interval=activity$interval,
+                                    time=activity$time),
+                            FUN=mean, na.rm=T)
+
+print(head(steps_interval))
+
+chart <- ggplot(steps_interval) +
+    aes(interval, steps) +
+    geom_line()
+    # scale_x_discrete(labels=time) + 
+    # theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+print(chart)
+
+# Getting the interval with most steps
+max_steps <- max(steps_interval$steps)
+max_steps <- steps_interval[max_steps == steps_interval$steps, ]
+
+# Interval with max avg steps
+max_steps$time
+
+# Number of steps in this interval
+max_steps$steps
+```
 
 
 
